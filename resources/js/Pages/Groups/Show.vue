@@ -324,19 +324,19 @@ const addMember = () => {
                                 label="Add by email"
                                 placeholder="friend@example.com"
                                 :error-messages="memberForm.errors.email"
+                            />
+                            <!-- Keep the button outside the text field: Vuetify fields cancel
+                                 clicks on anything inside them, so a submit button there never fires. -->
+                            <v-btn
+                                type="submit"
+                                color="primary"
+                                variant="tonal"
+                                block
+                                prepend-icon="mdi-account-plus-outline"
+                                :loading="memberForm.processing"
                             >
-                                <template #append-inner>
-                                    <v-btn
-                                        type="submit"
-                                        icon="mdi-account-plus-outline"
-                                        variant="text"
-                                        size="small"
-                                        color="primary"
-                                        aria-label="Add member"
-                                        :loading="memberForm.processing"
-                                    />
-                                </template>
-                            </v-text-field>
+                                Add member
+                            </v-btn>
                         </v-form>
                     </v-card-text>
                 </v-card>
