@@ -129,7 +129,7 @@ The app repeatedly pairs the person who **owes the most** with the person who is
 ### Installation
 
 ```bash
-git clone <your-repo-url> expense-splitter
+git clone https://github.com/ginabeth-web/expense-splitter.git
 cd expense-splitter
 ```
 
