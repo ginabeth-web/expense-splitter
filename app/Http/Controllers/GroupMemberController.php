@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AddMemberRequest;
 use App\Models\Group;
 use App\Models\User;
+use App\Services\BalanceCalculator;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 
 class GroupMemberController extends Controller
 {
@@ -15,5 +18,25 @@ class GroupMemberController extends Controller
         $group->members()->attach($user);
 
         return redirect()->route('groups.show', $group)->with('success', "{$user->name} was added.");
+    }
+
+    public function destroy(Group $group, User $user, BalanceCalculator $calculator): RedirectResponse
+    {
+        Gate::authorize('update', $group);
+        abort_unless($group->hasMember($user), 404);
+
+        if ($group->members()->count() === 1) {
+            throw ValidationException::withMessages(['member' => 'A group needs at least one member.']);
+        }
+
+        if (($calculator->forGroup($group)[$user->id] ?? 0) !== 0) {
+            throw ValidationException::withMessages([
+                'member' => "{$user->name} still has an unsettled balance. Settle up first.",
+            ]);
+        }
+
+        $group->members()->detach($user);
+
+        return redirect()->route('groups.show', $group)->with('success', "{$user->name} was removed.");
     }
 }

@@ -139,6 +139,72 @@ class GroupTest extends TestCase
         $this->assertSame(1, $group->members()->count());
     }
 
+    public function test_member_with_zero_balance_can_be_removed(): void
+    {
+        $user = User::factory()->create();
+        $friend = User::factory()->create();
+        $group = Group::factory()->create(['created_by' => $user->id]);
+        $group->members()->attach($friend);
+
+        $this->actingAs($user)
+            ->delete(route('groups.members.destroy', [$group, $friend]))
+            ->assertRedirect(route('groups.show', $group));
+
+        $this->assertFalse($group->hasMember($friend));
+    }
+
+    public function test_member_with_nonzero_balance_cannot_be_removed(): void
+    {
+        $user = User::factory()->create();
+        $friend = User::factory()->create();
+        $group = Group::factory()->create(['created_by' => $user->id]);
+        $group->members()->attach($friend);
+        $expense = Expense::factory()->for($group)->create(['paid_by' => $user->id, 'amount_cents' => 2000]);
+        $expense->shares()->create(['user_id' => $user->id, 'amount_cents' => 1000]);
+        $expense->shares()->create(['user_id' => $friend->id, 'amount_cents' => 1000]);
+
+        $this->actingAs($user)
+            ->delete(route('groups.members.destroy', [$group, $friend]))
+            ->assertSessionHasErrors('member');
+
+        $this->assertTrue($group->hasMember($friend));
+    }
+
+    public function test_last_member_cannot_be_removed(): void
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->create(['created_by' => $user->id]);
+
+        $this->actingAs($user)
+            ->delete(route('groups.members.destroy', [$group, $user]))
+            ->assertSessionHasErrors('member');
+
+        $this->assertTrue($group->hasMember($user));
+    }
+
+    public function test_non_member_cannot_remove_members(): void
+    {
+        $group = Group::factory()->create();
+        $creator = User::findOrFail($group->created_by);
+        $group->members()->attach(User::factory()->create());
+
+        $this->actingAs(User::factory()->create())
+            ->delete(route('groups.members.destroy', [$group, $creator]))
+            ->assertForbidden();
+
+        $this->assertTrue($group->hasMember($creator));
+    }
+
+    public function test_removing_someone_not_in_group_returns_404(): void
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->create(['created_by' => $user->id]);
+
+        $this->actingAs($user)
+            ->delete(route('groups.members.destroy', [$group, User::factory()->create()]))
+            ->assertNotFound();
+    }
+
     public function test_non_member_cannot_add_members(): void
     {
         $group = Group::factory()->create();

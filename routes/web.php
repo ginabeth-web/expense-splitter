@@ -1,30 +1,23 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\GroupMemberController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettlementController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+Route::get('/', fn () => redirect()->route(auth()->check() ? 'dashboard' : 'login'));
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', DashboardController::class)
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::resource('groups', GroupController::class)->only(['index', 'create', 'store', 'show']);
     Route::post('/groups/{group}/members', [GroupMemberController::class, 'store'])->name('groups.members.store');
+    Route::delete('/groups/{group}/members/{user}', [GroupMemberController::class, 'destroy'])->name('groups.members.destroy');
     Route::resource('groups.expenses', ExpenseController::class)
         ->only(['create', 'store', 'edit', 'update', 'destroy'])
         ->scoped();

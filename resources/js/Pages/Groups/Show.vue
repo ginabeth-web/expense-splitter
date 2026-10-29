@@ -62,6 +62,14 @@ const deleteSettlement = (settlement) => {
     }
 };
 
+const removeMember = (member) => {
+    if (confirm(`Remove ${member.name} from ${props.group.name}?`)) {
+        router.delete(route('groups.members.destroy', [props.group.id, member.id]), {
+            preserveScroll: true,
+        });
+    }
+};
+
 const memberForm = useForm({ email: '' });
 
 const addMember = () => {
@@ -248,11 +256,25 @@ const addMember = () => {
                     <section class="space-y-4 bg-white p-6 shadow-sm sm:rounded-lg">
                         <h3 class="text-lg font-medium text-gray-900">Members</h3>
                         <ul class="divide-y divide-gray-100">
-                            <li v-for="member in members" :key="member.id" class="py-2">
-                                <div class="font-medium text-gray-900">{{ member.name }}</div>
-                                <div class="text-sm text-gray-500">{{ member.email }}</div>
+                            <li
+                                v-for="member in members"
+                                :key="member.id"
+                                class="flex items-center justify-between gap-2 py-2"
+                            >
+                                <div>
+                                    <div class="font-medium text-gray-900">{{ member.name }}</div>
+                                    <div class="text-sm text-gray-500">{{ member.email }}</div>
+                                </div>
+                                <button
+                                    type="button"
+                                    class="text-sm text-red-600 hover:text-red-800"
+                                    @click="removeMember(member)"
+                                >
+                                    Remove
+                                </button>
                             </li>
                         </ul>
+                        <InputError :message="$page.props.errors.member" />
 
                         <form @submit.prevent="addMember" class="space-y-2">
                             <TextInput
