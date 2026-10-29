@@ -1,10 +1,5 @@
 <script setup>
-import Checkbox from '@/Components/Checkbox.vue';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
 defineProps({
@@ -33,68 +28,40 @@ const submit = () => {
     <GuestLayout>
         <Head title="Log in" />
 
-        <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
-            {{ status }}
+        <h1 class="text-h6 mb-4">Log in</h1>
+
+        <v-alert v-if="status" type="success" variant="tonal" density="compact" class="mb-4" :text="status" />
+
+        <v-form @submit.prevent="submit">
+            <v-text-field
+                v-model="form.email"
+                type="email"
+                label="Email"
+                prepend-inner-icon="mdi-email-outline"
+                autocomplete="username"
+                :error-messages="form.errors.email"
+                autofocus
+            />
+            <v-text-field
+                v-model="form.password"
+                type="password"
+                label="Password"
+                prepend-inner-icon="mdi-lock-outline"
+                autocomplete="current-password"
+                :error-messages="form.errors.password"
+            />
+            <v-checkbox v-model="form.remember" label="Remember me" color="primary" density="compact" hide-details />
+
+            <v-btn type="submit" color="primary" block size="large" class="mt-4" :loading="form.processing">
+                Log in
+            </v-btn>
+        </v-form>
+
+        <div class="d-flex justify-space-between mt-4 text-body-2">
+            <Link v-if="canResetPassword" :href="route('password.request')" class="text-primary">
+                Forgot your password?
+            </Link>
+            <Link :href="route('register')" class="text-primary">Create an account</Link>
         </div>
-
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    v-model="form.email"
-                    required
-                    autofocus
-                    autocomplete="username"
-                />
-
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
-
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
-
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="current-password"
-                />
-
-                <InputError class="mt-2" :message="form.errors.password" />
-            </div>
-
-            <div class="mt-4 block">
-                <label class="flex items-center">
-                    <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600"
-                        >Remember me</span
-                    >
-                </label>
-            </div>
-
-            <div class="mt-4 flex items-center justify-end">
-                <Link
-                    v-if="canResetPassword"
-                    :href="route('password.request')"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                >
-                    Forgot your password?
-                </Link>
-
-                <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Log in
-                </PrimaryButton>
-            </div>
-        </form>
     </GuestLayout>
 </template>

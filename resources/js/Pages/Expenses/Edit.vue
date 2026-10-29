@@ -15,21 +15,20 @@ defineProps({
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                Edit expense in {{ group.name }}
-            </h2>
+            <div>
+                <h1 class="text-h5 font-weight-medium">Edit expense</h1>
+                <div class="text-body-2 text-medium-emphasis">{{ group.name }}</div>
+            </div>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-2xl sm:px-6 lg:px-8">
-                <ExpenseForm
-                    :group="group"
-                    :members="members"
-                    :expense="expense"
-                    :submit-url="route('groups.expenses.update', [group.id, expense.id])"
-                    method="put"
-                />
-            </div>
+        <div style="max-width: 720px">
+            <ExpenseForm
+                :group="group"
+                :members="members"
+                :expense="expense"
+                :submit-url="route('groups.expenses.update', [group.id, expense.id])"
+                method="put"
+            />
         </div>
     </AuthenticatedLayout>
 </template>

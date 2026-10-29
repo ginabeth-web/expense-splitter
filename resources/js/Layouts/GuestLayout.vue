@@ -1,22 +1,28 @@
 <script setup>
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import { Link } from '@inertiajs/vue3';
 </script>
 
 <template>
-    <div
-        class="flex min-h-screen flex-col items-center bg-gray-100 pt-6 sm:justify-center sm:pt-0"
-    >
-        <div>
-            <Link href="/">
-                <ApplicationLogo class="h-20 w-20 fill-current text-gray-500" />
-            </Link>
-        </div>
-
-        <div
-            class="mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg"
-        >
-            <slot />
-        </div>
-    </div>
+    <v-app>
+        <v-main class="d-flex align-center">
+            <v-container style="max-width: 460px">
+                <div class="text-center mb-6">
+                    <Link href="/" class="guest-logo">
+                        <v-icon icon="mdi-cash-multiple" color="primary" size="56" />
+                        <div class="text-h5 font-weight-bold mt-2">Expense Splitter</div>
+                    </Link>
+                </div>
+                <v-card class="pa-6" elevation="2">
+                    <slot />
+                </v-card>
+            </v-container>
+        </v-main>
+    </v-app>
 </template>
+
+<style scoped>
+.guest-logo {
+    color: inherit;
+    text-decoration: none;
+}
+</style>

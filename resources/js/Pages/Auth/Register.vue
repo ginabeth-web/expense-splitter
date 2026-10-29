@@ -1,9 +1,5 @@
 <script setup>
 import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
 const form = useForm({
@@ -24,90 +20,49 @@ const submit = () => {
     <GuestLayout>
         <Head title="Register" />
 
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="name" value="Name" />
+        <h1 class="text-h6 mb-4">Create an account</h1>
 
-                <TextInput
-                    id="name"
-                    type="text"
-                    class="mt-1 block w-full"
-                    v-model="form.name"
-                    required
-                    autofocus
-                    autocomplete="name"
-                />
+        <v-form @submit.prevent="submit">
+            <v-text-field
+                v-model="form.name"
+                label="Name"
+                prepend-inner-icon="mdi-account-outline"
+                autocomplete="name"
+                :error-messages="form.errors.name"
+                autofocus
+            />
+            <v-text-field
+                v-model="form.email"
+                type="email"
+                label="Email"
+                prepend-inner-icon="mdi-email-outline"
+                autocomplete="username"
+                :error-messages="form.errors.email"
+            />
+            <v-text-field
+                v-model="form.password"
+                type="password"
+                label="Password"
+                prepend-inner-icon="mdi-lock-outline"
+                autocomplete="new-password"
+                :error-messages="form.errors.password"
+            />
+            <v-text-field
+                v-model="form.password_confirmation"
+                type="password"
+                label="Confirm password"
+                prepend-inner-icon="mdi-lock-check-outline"
+                autocomplete="new-password"
+                :error-messages="form.errors.password_confirmation"
+            />
 
-                <InputError class="mt-2" :message="form.errors.name" />
-            </div>
+            <v-btn type="submit" color="primary" block size="large" class="mt-2" :loading="form.processing">
+                Register
+            </v-btn>
+        </v-form>
 
-            <div class="mt-4">
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    v-model="form.email"
-                    required
-                    autocomplete="username"
-                />
-
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
-
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
-
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="new-password"
-                />
-
-                <InputError class="mt-2" :message="form.errors.password" />
-            </div>
-
-            <div class="mt-4">
-                <InputLabel
-                    for="password_confirmation"
-                    value="Confirm Password"
-                />
-
-                <TextInput
-                    id="password_confirmation"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password_confirmation"
-                    required
-                    autocomplete="new-password"
-                />
-
-                <InputError
-                    class="mt-2"
-                    :message="form.errors.password_confirmation"
-                />
-            </div>
-
-            <div class="mt-4 flex items-center justify-end">
-                <Link
-                    :href="route('login')"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                >
-                    Already registered?
-                </Link>
-
-                <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Register
-                </PrimaryButton>
-            </div>
-        </form>
+        <div class="text-center mt-4 text-body-2">
+            <Link :href="route('login')" class="text-primary">Already registered? Log in</Link>
+        </div>
     </GuestLayout>
 </template>
