@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreGroupRequest;
 use App\Models\Expense;
 use App\Models\Group;
+use App\Services\BalanceCalculator;
+use App\Services\DebtSimplifier;
 use App\Support\Money;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -45,14 +47,32 @@ class GroupController extends Controller
         return redirect()->route('groups.show', $group)->with('success', 'Group created.');
     }
 
-    public function show(Group $group): Response
+    public function show(Group $group, BalanceCalculator $calculator, DebtSimplifier $simplifier): Response
     {
         Gate::authorize('view', $group);
 
+        $members = $group->members()->orderBy('name')->get();
+        $names = $members->pluck('name', 'id');
+        $balances = $calculator->forGroup($group);
+
         return Inertia::render('Groups/Show', [
             'group' => $group->only('id', 'name', 'currency'),
-            'members' => $group->members()->orderBy('name')->get()
-                ->map(fn ($member) => $member->only('id', 'name', 'email')),
+            'members' => $members->map(fn ($member) => $member->only('id', 'name', 'email')),
+            'balances' => collect($balances)->map(fn (int $cents, int $userId) => [
+                'user_id' => $userId,
+                'name' => $names[$userId] ?? 'Former member',
+                'cents' => $cents,
+                'display' => Money::format(abs($cents), $group->currency),
+            ])->values(),
+            'suggestions' => collect($simplifier->simplify($balances))->map(fn (array $payment) => [
+                'from_id' => $payment['from'],
+                'from_name' => $names[$payment['from']] ?? 'Former member',
+                'to_id' => $payment['to'],
+                'to_name' => $names[$payment['to']] ?? 'Former member',
+                'cents' => $payment['amount'],
+                'display' => Money::format($payment['amount'], $group->currency),
+                'amount' => Money::toInput($payment['amount']),
+            ]),
             'expenses' => $group->expenses()
                 ->with('payer:id,name')
                 ->orderByDesc('spent_on')

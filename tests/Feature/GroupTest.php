@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Expense;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -65,6 +66,33 @@ class GroupTest extends TestCase
                 ->component('Groups/Show')
                 ->where('group.id', $group->id)
                 ->has('members', 2));
+    }
+
+    public function test_group_page_passes_balances_and_suggestions(): void
+    {
+        [$alice, $bob, $carol] = User::factory()->count(3)->create()->all();
+        $group = Group::factory()->create(['created_by' => $alice->id]);
+        $group->members()->attach([$bob->id, $carol->id]);
+        $expense = Expense::factory()->for($group)->create(['paid_by' => $alice->id, 'amount_cents' => 30000]);
+        foreach ([$alice, $bob, $carol] as $member) {
+            $expense->shares()->create(['user_id' => $member->id, 'amount_cents' => 10000]);
+        }
+
+        $this->actingAs($bob)->get(route('groups.show', $group))
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->where('balances.0.user_id', $alice->id)
+                ->where('balances.0.name', $alice->name)
+                ->where('balances.0.cents', 20000)
+                ->where('balances.0.display', 'PHP 200.00')
+                ->where('balances.1.cents', -10000)
+                ->has('suggestions', 2)
+                ->where('suggestions.0.from_id', $bob->id)
+                ->where('suggestions.0.from_name', $bob->name)
+                ->where('suggestions.0.to_id', $alice->id)
+                ->where('suggestions.0.to_name', $alice->name)
+                ->where('suggestions.0.cents', 10000)
+                ->where('suggestions.0.display', 'PHP 100.00')
+                ->where('suggestions.0.amount', '100.00'));
     }
 
     public function test_non_member_cannot_view_group(): void

@@ -1,4 +1,5 @@
 <script setup>
+import BalanceList from '@/Components/BalanceList.vue';
 import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
@@ -9,6 +10,8 @@ const props = defineProps({
     group: Object,
     members: Array,
     expenses: Array,
+    balances: Array,
+    suggestions: Array,
 });
 
 const deleteExpense = (expense) => {
@@ -85,6 +88,32 @@ const addMember = () => {
                     </section>
                 </div>
 
+                <div class="space-y-6">
+                <section class="bg-white p-6 shadow-sm sm:rounded-lg">
+                    <h3 class="text-lg font-medium text-gray-900">Balances</h3>
+                    <BalanceList class="mt-2" :balances="balances" />
+                </section>
+
+                <section class="bg-white p-6 shadow-sm sm:rounded-lg">
+                    <h3 class="text-lg font-medium text-gray-900">Suggested payments</h3>
+                    <p v-if="suggestions.length === 0" class="mt-2 text-sm text-gray-600">
+                        Everyone is settled up.
+                    </p>
+                    <ul v-else class="mt-2 divide-y divide-gray-100">
+                        <li
+                            v-for="suggestion in suggestions"
+                            :key="`${suggestion.from_id}-${suggestion.to_id}`"
+                            class="flex items-center justify-between gap-2 py-2 text-sm"
+                        >
+                            <span>
+                                <strong>{{ suggestion.from_name }}</strong> pays
+                                <strong>{{ suggestion.to_name }}</strong>
+                                {{ suggestion.display }}
+                            </span>
+                        </li>
+                    </ul>
+                </section>
+
                 <section class="space-y-4 bg-white p-6 shadow-sm sm:rounded-lg">
                     <h3 class="text-lg font-medium text-gray-900">Members</h3>
                     <ul class="divide-y divide-gray-100">
@@ -106,6 +135,7 @@ const addMember = () => {
                         <PrimaryButton :disabled="memberForm.processing">Add member</PrimaryButton>
                     </form>
                 </section>
+                </div>
             </div>
         </div>
     </AuthenticatedLayout>
