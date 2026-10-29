@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreGroupRequest;
 use App\Models\Expense;
 use App\Models\Group;
+use App\Models\Settlement;
 use App\Services\BalanceCalculator;
 use App\Services\DebtSimplifier;
 use App\Support\Money;
@@ -85,6 +86,19 @@ class GroupController extends Controller
                     'payer_name' => $expense->payer->name,
                     'amount_cents' => $expense->amount_cents,
                     'amount_display' => Money::format($expense->amount_cents, $group->currency),
+                ]),
+            'settlements' => $group->settlements()
+                ->with(['sender:id,name', 'recipient:id,name'])
+                ->orderByDesc('settled_on')
+                ->orderByDesc('id')
+                ->get()
+                ->map(fn (Settlement $settlement) => [
+                    'id' => $settlement->id,
+                    'from_name' => $settlement->sender->name,
+                    'to_name' => $settlement->recipient->name,
+                    'settled_on' => $settlement->settled_on->toDateString(),
+                    'amount_cents' => $settlement->amount_cents,
+                    'amount_display' => Money::format($settlement->amount_cents, $group->currency),
                 ]),
         ]);
     }

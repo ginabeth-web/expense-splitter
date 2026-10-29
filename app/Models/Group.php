@@ -31,6 +31,11 @@ class Group extends Model
         return $this->hasMany(Expense::class);
     }
 
+    public function settlements(): HasMany
+    {
+        return $this->hasMany(Settlement::class);
+    }
+
     public function hasMember(User $user): bool
     {
         return $this->members()->whereKey($user->id)->exists();

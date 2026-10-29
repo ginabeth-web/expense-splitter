@@ -37,6 +37,12 @@ class BalanceCalculator
             $balances[$userId] = ($balances[$userId] ?? 0) - (int) $total;
         }
 
+        // Paying someone back counts like paying for them.
+        foreach ($group->settlements()->get(['from_user_id', 'to_user_id', 'amount_cents']) as $settlement) {
+            $balances[$settlement->from_user_id] = ($balances[$settlement->from_user_id] ?? 0) + $settlement->amount_cents;
+            $balances[$settlement->to_user_id] = ($balances[$settlement->to_user_id] ?? 0) - $settlement->amount_cents;
+        }
+
         ksort($balances);
 
         return $balances;

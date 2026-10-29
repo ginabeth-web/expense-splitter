@@ -4,6 +4,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\GroupMemberController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SettlementController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -26,6 +27,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/groups/{group}/members', [GroupMemberController::class, 'store'])->name('groups.members.store');
     Route::resource('groups.expenses', ExpenseController::class)
         ->only(['create', 'store', 'edit', 'update', 'destroy'])
+        ->scoped();
+    Route::resource('groups.settlements', SettlementController::class)
+        ->only(['store', 'destroy'])
         ->scoped();
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -96,6 +96,28 @@ class BalanceCalculatorTest extends TestCase
         ], $this->balances());
     }
 
+    public function test_settlements_move_balances(): void
+    {
+        $this->expense($this->alice, 30000, [
+            $this->alice->id => 10000,
+            $this->bob->id => 10000,
+            $this->carol->id => 10000,
+        ]);
+        $this->group->settlements()->create([
+            'from_user_id' => $this->bob->id,
+            'to_user_id' => $this->alice->id,
+            'amount_cents' => 10000,
+            'settled_on' => '2026-10-29',
+            'created_by' => $this->bob->id,
+        ]);
+
+        $this->assertSame([
+            $this->alice->id => 10000,
+            $this->bob->id => 0,
+            $this->carol->id => -10000,
+        ], $this->balances());
+    }
+
     public function test_other_groups_expenses_are_ignored(): void
     {
         $other = Group::factory()->create(['created_by' => $this->alice->id]);
