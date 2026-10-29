@@ -191,10 +191,11 @@ const addMember = () => {
                             </PrimaryButton>
                         </form>
                         <div class="mt-2 space-y-1">
-                            <InputError :message="paymentForm.errors.from_user_id" />
-                            <InputError :message="paymentForm.errors.to_user_id" />
-                            <InputError :message="paymentForm.errors.amount" />
-                            <InputError :message="paymentForm.errors.settled_on" />
+                            <!-- Page errors cover both this form and the "Mark as paid" buttons. -->
+                            <InputError :message="$page.props.errors.from_user_id" />
+                            <InputError :message="$page.props.errors.to_user_id" />
+                            <InputError :message="$page.props.errors.amount" />
+                            <InputError :message="$page.props.errors.settled_on" />
                         </div>
 
                         <p v-if="settlements.length === 0" class="mt-4 text-sm text-gray-600">

@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Group;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -50,6 +52,13 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+
+        // Groups, expenses and payments reference the user, so the account must stay.
+        if ($user->groups()->exists() || Group::where('created_by', $user->id)->exists()) {
+            throw ValidationException::withMessages([
+                'password' => 'You are still part of one or more groups, so your account can\'t be deleted.',
+            ]);
+        }
 
         Auth::logout();
 

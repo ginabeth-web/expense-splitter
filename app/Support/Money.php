@@ -6,17 +6,23 @@ class Money
 {
     /**
      * Parse a user-typed amount like "1,234.5" into cents. Returns null for
-     * anything that isn't a positive amount with at most two decimals.
+     * anything that isn't a positive amount with at most two decimals and at
+     * most 12 whole digits. Commas are only accepted as thousands separators.
      */
     public static function toCents(string $input): ?int
     {
-        $value = str_replace(',', '', trim($input));
+        $value = trim($input);
 
-        if (! preg_match('/^(\d+)(?:\.(\d{1,2}))?$/', $value, $matches)) {
+        if (! preg_match('/^(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d{1,2}))?$/', $value, $matches)) {
             return null;
         }
 
-        $cents = (int) $matches[1] * 100 + (int) str_pad($matches[2] ?? '0', 2, '0');
+        $whole = str_replace(',', '', $matches[1]);
+        if (strlen(ltrim($whole, '0')) > 12) {
+            return null;
+        }
+
+        $cents = (int) $whole * 100 + (int) str_pad($matches[2] ?? '0', 2, '0');
 
         return $cents > 0 ? $cents : null;
     }

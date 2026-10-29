@@ -170,6 +170,48 @@ class GroupTest extends TestCase
         $this->assertTrue($group->hasMember($friend));
     }
 
+    public function test_member_with_expense_history_cannot_be_removed_even_when_settled(): void
+    {
+        $user = User::factory()->create();
+        $friend = User::factory()->create();
+        $group = Group::factory()->create(['created_by' => $user->id]);
+        $group->members()->attach($friend);
+        $expense = Expense::factory()->for($group)->create(['paid_by' => $user->id, 'amount_cents' => 2000]);
+        $expense->shares()->create(['user_id' => $user->id, 'amount_cents' => 1000]);
+        $expense->shares()->create(['user_id' => $friend->id, 'amount_cents' => 1000]);
+        $group->settlements()->create([
+            'from_user_id' => $friend->id,
+            'to_user_id' => $user->id,
+            'amount_cents' => 1000,
+            'settled_on' => '2026-10-29',
+            'created_by' => $friend->id,
+        ]);
+
+        $this->actingAs($user)
+            ->delete(route('groups.members.destroy', [$group, $friend]))
+            ->assertSessionHasErrors('member');
+
+        $this->assertTrue($group->hasMember($friend));
+    }
+
+    public function test_member_who_only_logged_an_expense_cannot_be_removed(): void
+    {
+        $user = User::factory()->create();
+        $friend = User::factory()->create();
+        $group = Group::factory()->create(['created_by' => $user->id]);
+        $group->members()->attach($friend);
+        $expense = Expense::factory()->for($group)->create([
+            'paid_by' => $user->id,
+            'created_by' => $friend->id,
+            'amount_cents' => 1000,
+        ]);
+        $expense->shares()->create(['user_id' => $user->id, 'amount_cents' => 1000]);
+
+        $this->actingAs($user)
+            ->delete(route('groups.members.destroy', [$group, $friend]))
+            ->assertSessionHasErrors('member');
+    }
+
     public function test_last_member_cannot_be_removed(): void
     {
         $user = User::factory()->create();

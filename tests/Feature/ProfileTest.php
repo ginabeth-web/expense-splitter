@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Group;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -59,6 +60,34 @@ class ProfileTest extends TestCase
             ->assertRedirect('/profile');
 
         $this->assertNotNull($user->refresh()->email_verified_at);
+    }
+
+    public function test_user_in_a_group_cannot_delete_their_account(): void
+    {
+        $user = User::factory()->create();
+        Group::factory()->create(['created_by' => $user->id]);
+
+        $this->actingAs($user)
+            ->from('/profile')
+            ->delete('/profile', ['password' => 'password'])
+            ->assertSessionHasErrors('password')
+            ->assertRedirect('/profile');
+
+        $this->assertNotNull($user->fresh());
+    }
+
+    public function test_user_who_created_a_group_they_left_cannot_delete_their_account(): void
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->create(['created_by' => $user->id]);
+        $group->members()->detach($user);
+
+        $this->actingAs($user)
+            ->from('/profile')
+            ->delete('/profile', ['password' => 'password'])
+            ->assertSessionHasErrors('password');
+
+        $this->assertNotNull($user->fresh());
     }
 
     public function test_user_can_delete_their_account(): void

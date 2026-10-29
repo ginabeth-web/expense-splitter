@@ -16,6 +16,8 @@ class MoneyTest extends TestCase
             [' 7 ', 700],
             ['1,000', 100000],
             ['0.05', 5],
+            ['1,000,000', 100000000],
+            ['999,999,999,999.99', 99999999999999],
         ];
     }
 
@@ -27,7 +29,13 @@ class MoneyTest extends TestCase
 
     public static function invalidInputs(): array
     {
-        return [['12.345'], ['0'], ['0.00'], ['-5'], ['abc'], [''], ['1.2.3']];
+        return [
+            ['12.345'], ['0'], ['0.00'], ['-5'], ['abc'], [''], ['1.2.3'],
+            // A comma decimal must not be read as a thousands separator.
+            ['12,50'], ['1,,0,0'], ['1,00'],
+            // Too large: would overflow integer cents.
+            ['1000000000000'], ['92233720368547759'],
+        ];
     }
 
     #[DataProvider('invalidInputs')]

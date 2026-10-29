@@ -35,8 +35,34 @@ class GroupMemberController extends Controller
             ]);
         }
 
+        // Old expenses and payments still name them, so removing them would leave
+        // records nobody can edit or settle.
+        if ($this->hasHistory($group, $user)) {
+            throw ValidationException::withMessages([
+                'member' => "{$user->name} is part of expenses or payments in this group, so they can't be removed.",
+            ]);
+        }
+
         $group->members()->detach($user);
 
         return redirect()->route('groups.show', $group)->with('success', "{$user->name} was removed.");
+    }
+
+    private function hasHistory(Group $group, User $user): bool
+    {
+        $id = $user->id;
+
+        return $group->expenses()
+            ->where(fn ($query) => $query
+                ->where('paid_by', $id)
+                ->orWhere('created_by', $id)
+                ->orWhereHas('shares', fn ($shares) => $shares->where('user_id', $id)))
+            ->exists()
+            || $group->settlements()
+                ->where(fn ($query) => $query
+                    ->where('from_user_id', $id)
+                    ->orWhere('to_user_id', $id)
+                    ->orWhere('created_by', $id))
+                ->exists();
     }
 }
