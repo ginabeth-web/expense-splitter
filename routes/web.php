@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\GroupMemberController;
 use App\Http\Controllers\ProfileController;
@@ -23,6 +24,9 @@ Route::get('/dashboard', function () {
 Route::middleware('auth')->group(function () {
     Route::resource('groups', GroupController::class)->only(['index', 'create', 'store', 'show']);
     Route::post('/groups/{group}/members', [GroupMemberController::class, 'store'])->name('groups.members.store');
+    Route::resource('groups.expenses', ExpenseController::class)
+        ->only(['create', 'store', 'edit', 'update', 'destroy'])
+        ->scoped();
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

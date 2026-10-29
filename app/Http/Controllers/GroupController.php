@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreGroupRequest;
+use App\Models\Expense;
 use App\Models\Group;
+use App\Support\Money;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -51,6 +53,19 @@ class GroupController extends Controller
             'group' => $group->only('id', 'name', 'currency'),
             'members' => $group->members()->orderBy('name')->get()
                 ->map(fn ($member) => $member->only('id', 'name', 'email')),
+            'expenses' => $group->expenses()
+                ->with('payer:id,name')
+                ->orderByDesc('spent_on')
+                ->orderByDesc('id')
+                ->get()
+                ->map(fn (Expense $expense) => [
+                    'id' => $expense->id,
+                    'description' => $expense->description,
+                    'spent_on' => $expense->spent_on->toDateString(),
+                    'payer_name' => $expense->payer->name,
+                    'amount_cents' => $expense->amount_cents,
+                    'amount_display' => Money::format($expense->amount_cents, $group->currency),
+                ]),
         ]);
     }
 }

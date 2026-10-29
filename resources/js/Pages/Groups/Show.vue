@@ -3,12 +3,21 @@ import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
     group: Object,
     members: Array,
+    expenses: Array,
 });
+
+const deleteExpense = (expense) => {
+    if (confirm(`Delete "${expense.description}"?`)) {
+        router.delete(route('groups.expenses.destroy', [props.group.id, expense.id]), {
+            preserveScroll: true,
+        });
+    }
+};
 
 const memberForm = useForm({ email: '' });
 
@@ -33,7 +42,48 @@ const addMember = () => {
 
         <div class="py-12">
             <div class="mx-auto grid max-w-7xl gap-6 sm:px-6 lg:grid-cols-3 lg:px-8">
-                <div class="space-y-6 lg:col-span-2"></div>
+                <div class="space-y-6 lg:col-span-2">
+                    <section class="bg-white p-6 shadow-sm sm:rounded-lg">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-medium text-gray-900">Expenses</h3>
+                            <Link
+                                :href="route('groups.expenses.create', group.id)"
+                                class="rounded-md bg-gray-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-gray-700"
+                            >
+                                Add expense
+                            </Link>
+                        </div>
+                        <p v-if="expenses.length === 0" class="mt-4 text-sm text-gray-600">
+                            No expenses yet.
+                        </p>
+                        <ul v-else class="mt-4 divide-y divide-gray-100">
+                            <li v-for="expense in expenses" :key="expense.id" class="flex items-center justify-between gap-4 py-3">
+                                <div>
+                                    <div class="font-medium text-gray-900">{{ expense.description }}</div>
+                                    <div class="text-sm text-gray-500">
+                                        {{ expense.payer_name }} paid · {{ expense.spent_on }}
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <span class="font-medium text-gray-900">{{ expense.amount_display }}</span>
+                                    <Link
+                                        :href="route('groups.expenses.edit', [group.id, expense.id])"
+                                        class="text-sm text-indigo-600 hover:text-indigo-800"
+                                    >
+                                        Edit
+                                    </Link>
+                                    <button
+                                        type="button"
+                                        class="text-sm text-red-600 hover:text-red-800"
+                                        @click="deleteExpense(expense)"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </li>
+                        </ul>
+                    </section>
+                </div>
 
                 <section class="space-y-4 bg-white p-6 shadow-sm sm:rounded-lg">
                     <h3 class="text-lg font-medium text-gray-900">Members</h3>
