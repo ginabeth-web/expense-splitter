@@ -4,10 +4,13 @@ A web app for splitting shared costs with friends, housemates or travel buddies.
 
 Built with **Laravel 12**, **Vue 3**, **Inertia.js** and **Vuetify 3**.
 
+![Group page with expenses, balances and suggested payments](docs/screenshots/group.png)
+
 ---
 
 ## Table of contents
 
+- [Screenshots](#screenshots)
 - [Features](#features)
 - [How it works](#how-it-works)
 - [Tech stack](#tech-stack)
@@ -22,6 +25,33 @@ Built with **Laravel 12**, **Vue 3**, **Inertia.js** and **Vuetify 3**.
 - [Laravel Boost (AI tooling)](#laravel-boost-ai-tooling)
 - [Troubleshooting](#troubleshooting)
 - [Known limitations](#known-limitations)
+
+---
+
+## Screenshots
+
+### Dashboard
+Every group you're in, with your own balance in each.
+
+![Dashboard showing three groups with balance chips](docs/screenshots/dashboard.png)
+
+### Group page
+Expenses and payments on the left; balances, suggested payments and members on the right.
+
+![Group page for a trip with four expenses](docs/screenshots/group.png)
+
+### Adding an expense
+Pick how to split it. The hint shows what's still left to assign before you save.
+
+![Add expense form using a percentage split](docs/screenshots/add-expense.png)
+
+### Log in
+
+![Login page](docs/screenshots/login.png)
+
+### On a phone
+
+<img src="docs/screenshots/mobile.png" alt="Group page on a phone" width="320">
 
 ---
 
@@ -282,7 +312,7 @@ database/
 ├── factories/                             Group and Expense factories for tests
 └── seeders/DatabaseSeeder.php             The two test users
 
-docs/superpowers/plans/                    The original implementation plan
+docs/screenshots/                          Images used in this README
 ```
 
 ---
@@ -390,7 +420,7 @@ This project is set up with [Laravel Boost](https://laravel.com/docs/12.x/boost)
 
 - **`.mcp.json`** starts the Boost MCP server (`php artisan boost:mcp`), which lets the AI agent read the database schema, routes, logs and Laravel docs.
 - **`AGENTS.md`** holds Boost's coding guidelines; **`CLAUDE.md`** imports it so Claude Code loads it automatically.
-- **`.claude/skills/`** contains Boost's agent skills (Laravel best practices, testing, Inertia + Vue and more).
+- **Agent skills** (Laravel best practices, testing, Inertia + Vue and more) are installed into `.claude/skills/`. That folder is git-ignored, so after cloning run `php artisan boost:install` (or `php artisan boost:update`) to generate it locally.
 
 Refresh the guidelines and skills when Boost releases new ones:
 
